@@ -6,7 +6,7 @@
 #      右键 → 导出 → 存成 .p12，设一个密码
 #   2. 准备好 App Store Connect API 密钥的 Issuer ID（App Store Connect → 用户和访问 → 集成 页面顶部）
 #
-#   ./scripts/setup-ci-secrets.sh
+#   ./scripts/setup-ci-secrets.sh [证书.p12 路径]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO=CatsJuice/keypop
@@ -16,7 +16,8 @@ gh auth status >/dev/null 2>&1 || { echo "先 gh auth login" >&2; exit 1; }
 secret() { gh secret set "$1" --repo "$REPO" >/dev/null && echo "  ✓ $1"; }
 
 echo "【1/3】Developer ID 证书"
-read -r -p "  导出的 .p12 文件路径（可直接把文件拖进来）: " P12
+P12=${1:-}
+[[ -n "$P12" ]] || read -r -p "  导出的 .p12 文件路径（可直接把文件拖进来）: " P12
 P12=${P12//\\ / }; P12=${P12%\'}; P12=${P12#\'}; P12=${P12%% }
 [[ -f "$P12" ]] || { echo "  找不到文件：$P12" >&2; exit 1; }
 read -r -s -p "  .p12 的密码: " P12_PASS; echo
