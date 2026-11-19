@@ -1,0 +1,98 @@
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: crosshair;
+  font-family: "SF Pro Rounded", "PingFang SC", ui-rounded, system-ui, sans-serif;
+}
+
+/* 纯深色背景，像夜空一样衬托特效 */
+body { background: #000; }
+
+#fx, #stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#stage { overflow: hidden; }
+
+/* 按键弹出的大字 / emoji */
+.glyph {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.1em;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0.06em 0 rgba(0, 0, 0, 0.25), 0 0 0.4em currentColor;
+  transform: translate(-50%, -50%);
+  animation: pop 1.6s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+.glyph .em { font-size: 0.8em; text-shadow: none; }
+img.emoji { display: block; width: 1em; height: 1em; }
+@keyframes pop {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(var(--r0)); opacity: 0; }
+  18%  { transform: translate(-50%, -50%) scale(1.15) rotate(var(--r1)); opacity: 1; }
+  30%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  70%  { transform: translate(-50%, -60%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -120%) scale(0.6) rotate(var(--r0)); opacity: 0; }
+}
+
+/* 回车键的 emoji 雨 */
+.drop {
+  position: absolute;
+  top: -12vh;
+  animation: fall linear forwards;
+  will-change: transform;
+}
+@keyframes fall {
+  to { transform: translateY(125vh) rotate(var(--spin)); }
+}
+
+#hint {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.6s;
+}
+#hint.hidden { opacity: 0; }
+.hint-emoji { font-size: 96px; animation: wobble 1.6s ease-in-out infinite; }
+.hint-title { font-size: 56px; font-weight: 900; }
+.hint-sub { font-size: 22px; opacity: 0.75; }
+@keyframes wobble {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.1); }
+}
+
+#fullscreen {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+}
+#fullscreen:hover { opacity: 1; }
+:fullscreen #fullscreen { display: none; }

@@ -1,0 +1,5 @@
+build/
+KeyPop.xcodeproj/
+.DS_Store
+.claude/
+KeyPop/Config/Local.xcconfig

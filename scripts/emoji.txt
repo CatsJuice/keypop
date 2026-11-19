@@ -1,0 +1,67 @@
+# slug|Fluent Emoji 文件夹名（https://github.com/microsoft/fluentui-emoji）
+apple|Red apple
+bear|Bear
+cat|Cat face
+dog|Dog face
+elephant|Elephant
+frog|Frog
+giraffe|Giraffe
+horse|Horse face
+icecream|Soft ice cream
+juice|Beverage box
+koala|Koala
+lion|Lion
+monkey|Monkey face
+peanuts|Peanuts
+octopus|Octopus
+panda|Panda
+crown|Crown
+rabbit|Rabbit face
+star|Star
+tiger|Tiger face
+unicorn|Unicorn
+violin|Violin
+whale|Spouting whale
+fox|Fox
+yoyo|Yo-yo
+zebra|Zebra
+balloon|Balloon
+bubbles|Bubbles
+rainbow|Rainbow
+lollipop|Lollipop
+butterfly|Butterfly
+chick|Hatching chick
+blossom|Cherry blossom
+strawberry|Strawberry
+rocket|Rocket
+fish|Tropical fish
+ribbon|Ribbon
+doughnut|Doughnut
+sun|Sun with face
+ladybug|Lady beetle
+teddy|Teddy bear
+kite|Kite
+bee|Honeybee
+crab|Crab
+turtle|Turtle
+sunflower|Sunflower
+watermelon|Watermelon
+cupcake|Cupcake
+party|Party popper
+snowman|Snowman without snow
+penguin|Penguin
+owl|Owl
+dolphin|Dolphin
+cherries|Cherries
+parachute|Parachute
+bird|Bird
+cyclone|Cyclone
+comet|Comet
+glowingstar|Glowing star
+duck|Duck
+babychick|Front-facing baby chick
+pig|Pig face
+cow|Cow face
+hamster|Hamster
+heart|Sparkling heart
+piano|Musical keyboard
