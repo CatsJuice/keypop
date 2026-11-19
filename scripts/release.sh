@@ -41,7 +41,7 @@ BUILD=$((MA * 10000 + MI * 100 + PA))   # CFBundleVersion，随版本号单调�
 
 # ---------- 发布前检查 ----------
 LOCAL_CFG=KeyPop/Config/Local.xcconfig
-[[ -f $LOCAL_CFG ]] || die "缺少 $LOCAL_CFG（发布必须用 Developer ID 证书签名，见 Signing.xcconfig 里的说明）"
+[[ -f $LOCAL_CFG ]] || die "缺少 ${LOCAL_CFG}（发布必须用 Developer ID 证书签名，见 Signing.xcconfig 里的说明）"
 IDENTITY=$(sed -n 's/^CODE_SIGN_IDENTITY *= *//p' $LOCAL_CFG | tail -1)
 [[ $IDENTITY == "Developer ID Application:"* ]] || die "Local.xcconfig 里的 CODE_SIGN_IDENTITY 必须是 Developer ID Application 证书"
 # 钥匙串里可能有同名的过期证书，直接用名字签会报 ambiguous，所以取有效证书的 SHA-1
@@ -59,7 +59,7 @@ if [[ $DRY_RUN != 1 ]]; then
 fi
 if [[ $SKIP_NOTARIZE != 1 ]]; then
   xcrun notarytool history "${NOTARY_AUTH[@]}" >/dev/null 2>&1 ||
-    die "公证凭据不可用（本地需先 xcrun notarytool store-credentials $NOTARY_PROFILE；CI 检查 ASC_* Secrets）"
+    die "公证凭据不可用（本地需先 xcrun notarytool store-credentials ${NOTARY_PROFILE}；CI 检查 ASC_* Secrets）"
 fi
 
 OUT=build/release/$VERSION
@@ -68,7 +68,7 @@ APP=$OUT/KeyPop.app
 DMG=$OUT/KeyPop-$VERSION.dmg
 
 # ---------- 构建 ----------
-step "构建 v$VERSION（build $BUILD）"
+step "构建 v${VERSION}（build ${BUILD}）"
 xcodegen generate --quiet
 xcodebuild -project KeyPop.xcodeproj -scheme KeyPop -configuration Release -derivedDataPath build/DerivedData \
   MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD" OTHER_CODE_SIGN_FLAGS="--timestamp" \
