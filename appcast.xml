@@ -5,5 +5,14 @@
     <link>https://github.com/CatsJuice/keypop</link>
     <description>KeyPop 版本更新</description>
     <language>zh-cn</language>
+    <item>
+      <title>1.0.0</title>
+      <pubDate>Thu, 19 Nov 2026 05:22:16 GMT</pubDate>
+      <sparkle:version>10000</sparkle:version>
+      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<ul><li>第一个版本</li><li>四种特效主题：烟花、泡泡、彩纸、星光</li><li>五套音效：木琴、八音盒、竖琴、游戏机、卡通</li><li>可选中英文朗读字母和数字</li><li>锁定键盘，防止孩子误触快捷键跳出</li></ul>]]></description>
+      <enclosure url="https://github.com/CatsJuice/keypop/releases/download/v1.0.0/KeyPop-1.0.0.dmg" type="application/octet-stream" sparkle:edSignature="LNq7QWpW+qaZlkVyMPXaiISbcGqfDgrd3jWMUUD1J8ILJMltZTwcnQ85tOn8iWeEvUhXDR20eFKEyAEvpjNZBg==" length="12063972" />
+    </item>
   </channel>
 </rss>
