@@ -74,6 +74,17 @@ xcodebuild -project KeyPop.xcodeproj -scheme KeyPop -configuration Release -deri
   MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD" OTHER_CODE_SIGN_FLAGS="--timestamp" \
   -quiet clean build
 ditto build/DerivedData/Build/Products/Release/KeyPop.app "$APP"
+# Sparkle 自带的辅助程序（XPC、Autoupdate、Updater.app）是 Sparkle 官方签的名，公证会拒绝，
+# 必须由内向外用自己的 Developer ID + 时间戳 + Hardened Runtime 逐个重签，最后重签 App 本身
+resign() { codesign --force --sign "$SIGN_HASH" --options runtime --timestamp "$@"; }
+SPK=$APP/Contents/Frameworks/Sparkle.framework/Versions/B
+for x in "$SPK"/XPCServices/*.xpc; do
+  [[ -e $x ]] && resign --preserve-metadata=entitlements "$x"
+done
+resign "$SPK/Autoupdate"
+resign "$SPK/Updater.app"
+resign "$APP/Contents/Frameworks/Sparkle.framework"
+resign "$APP"
 codesign --verify --deep --strict "$APP"
 [[ $(codesign -dv --verbose=2 "$APP" 2>&1) == *"(runtime)"* ]] || die "没有启用 Hardened Runtime，无法公证"
 SPARKLE_BIN=build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin
