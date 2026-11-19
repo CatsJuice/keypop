@@ -1,0 +1,22 @@
+# 每次推送 / PR 都构建一遍（临时签名），确保代码能编译
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 XcodeGen
+        run: brew install xcodegen
+
+      - name: 构建
+        run: |
+          xcodegen generate --quiet
+          xcodebuild -project KeyPop.xcodeproj -scheme KeyPop -configuration Release \
+            -derivedDataPath build/DerivedData -quiet build

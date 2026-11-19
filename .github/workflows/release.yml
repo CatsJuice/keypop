@@ -1,0 +1,96 @@
+# 发布新版本：在 GitHub → Actions → Release → Run workflow，填版本号和更新说明。
+# 构建 → Developer ID 签名 → 公证 → DMG → Sparkle 签名 → 更新 appcast.xml → 打 tag → 创建 Release
+#
+# 需要的仓库 Secrets（用 scripts/setup-ci-secrets.sh 一次性配置）：
+#   DEVELOPER_ID_P12_BASE64   Developer ID Application 证书 + 私钥（.p12，base64）
+#   DEVELOPER_ID_P12_PASSWORD .p12 的密码
+#   ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8_BASE64   App Store Connect API 密钥（用于公证）
+#   SPARKLE_PRIVATE_KEY       Sparkle 更新签名私钥
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 版本号（如 1.1.0）
+        required: true
+      notes:
+        description: 更新说明（多条用分号分隔）
+        required: false
+        default: 问题修复和体验改进。
+
+permissions:
+  contents: write
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: 安装 XcodeGen
+        run: brew install xcodegen
+
+      - name: 导入签名证书
+        env:
+          P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          KC="$RUNNER_TEMP/signing.keychain-db"
+          KC_PASS=$(openssl rand -hex 16)
+          echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KC_PASS" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KC_PASS" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KC_PASS" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          # 从证书里读出名字和团队 ID，写进本地签名配置
+          NAME=$(security find-identity -v -p codesigning "$KC" | grep -o '"Developer ID Application: .*"' | head -1 | tr -d '"')
+          [[ -n "$NAME" ]] || { echo "证书里没有 Developer ID Application" >&2; exit 1; }
+          TEAM=$(echo "$NAME" | sed -E 's/.*\(([A-Z0-9]+)\)$/\1/')
+          printf 'CODE_SIGN_IDENTITY = %s\nDEVELOPMENT_TEAM = %s\n' "$NAME" "$TEAM" > KeyPop/Config/Local.xcconfig
+          echo "使用证书：$NAME"
+
+      - name: 准备公证和 Sparkle 密钥
+        env:
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/asc.p8"
+          printf '%s' "$SPARKLE_PRIVATE_KEY" > "$RUNNER_TEMP/sparkle.key"
+
+      - name: 打包、签名、公证并发布
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASC_KEY_PATH: ${{ runner.temp }}/asc.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          SPARKLE_KEY_FILE: ${{ runner.temp }}/sparkle.key
+          VERSION: ${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          ./scripts/release.sh "$VERSION" "$NOTES"
+
+      - name: 上传构建产物（失败时便于排查）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ inputs.version }}
+          path: build/release/${{ inputs.version }}/
+          if-no-files-found: ignore
+
+      - name: 清理密钥
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/asc.p8" "$RUNNER_TEMP/sparkle.key" KeyPop/Config/Local.xcconfig

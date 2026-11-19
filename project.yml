@@ -9,10 +9,16 @@ settings:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.10.1"
 targets:
   KeyPop:
     type: application
     platform: macOS
+    dependencies:
+      - package: Sparkle
     sources:
       - path: KeyPop/Sources
       - path: KeyPop/Resources/Emoji
@@ -24,18 +30,27 @@ targets:
       path: KeyPop/Info.plist
       properties:
         CFBundleDisplayName: KeyPop
+        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleLocalizations: [zh-Hans, en]
         CFBundleName: KeyPop
         CFBundleIconFile: AppIcon
         LSApplicationCategoryType: public.app-category.kids-games
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: "Emoji © Microsoft Fluent Emoji (MIT)"
         NSPrincipalClass: NSApplication
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        # 自动更新（Sparkle）：更新源放在仓库里的 appcast.xml
+        SUFeedURL: https://raw.githubusercontent.com/CatsJuice/keypop/main/appcast.xml
+        SUPublicEDKey: JXBzLI5PSGU8PND4iGKN6KNoEsyW9fja9l+l7l+5IEQ=
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
     configFiles:
       Debug: KeyPop/Config/Signing.xcconfig
       Release: KeyPop/Config/Signing.xcconfig
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.catsjuice.keypop
-        ENABLE_HARDENED_RUNTIME: NO
+        ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: NO
         COMBINE_HIDPI_IMAGES: YES

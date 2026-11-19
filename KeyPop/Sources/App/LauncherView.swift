@@ -1,9 +1,11 @@
 import SwiftUI
 import AppKit
 import SpriteKit
+import Combine
 
 struct LauncherView: View {
     @ObservedObject private var s = Settings.shared
+    @ObservedObject private var updater = Updater.shared
     @State private var trusted = KeyboardLock.isTrusted
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     /// 叠在整个设置页上的透明特效层，点特效卡片时在卡片上原地放一次
@@ -112,7 +114,16 @@ struct LauncherView: View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("家长退出：按住左上角「退出」按钮，或按住 ⌃⌥⌘ 再按住 E，约 1.5 秒")
-                Text("Emoji 来自 Microsoft Fluent Emoji（MIT）").foregroundStyle(.tertiary)
+                HStack(spacing: 6) {
+                    Text("v\(updater.version)")
+                    Text("·")
+                    Button("检查更新") { updater.checkForUpdates() }
+                        .buttonStyle(.link)
+                        .disabled(!updater.canCheck)
+                    Text("·")
+                    Text("Emoji 来自 Microsoft Fluent Emoji（MIT）")
+                }
+                .foregroundStyle(.tertiary)
             }
             .font(.system(size: 12, design: .rounded))
             .foregroundStyle(.secondary)

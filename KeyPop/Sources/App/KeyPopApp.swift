@@ -17,6 +17,8 @@ struct KeyPopApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(after: .appInfo) {
+                Button("检查更新…") { Updater.shared.checkForUpdates() }
+                Divider()
                 Button("开始玩") { AppDelegate.startPlay() }
                     .keyboardShortcut("p", modifiers: [.command])
             }
@@ -36,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
         }
+        _ = Updater.shared   // 启动 Sparkle，按计划在后台检查更新
         // 启动参数 --play：直接进入游戏（方便做成快捷方式）
         if CommandLine.arguments.contains("--play") {
             DispatchQueue.main.async { AppDelegate.startPlay() }

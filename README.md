@@ -52,6 +52,38 @@
 
 `web/` 是最早的网页版，已不再维护。
 
+## 发布与自动更新
+
+App 内置 [Sparkle](https://sparkle-project.org) 自动更新：每天在后台检查一次 `appcast.xml`（孩子在玩时不检查、不弹窗），设置页底部和 App 菜单里也能手动「检查更新」。
+
+发布流程全部在 GitHub Actions 里完成（`.github/workflows/release.yml`）：构建（Hardened Runtime + Developer ID 签名）→ 公证并装订 App → 制作 DMG 并签名、公证 → Sparkle 签名 → 把新版本写进 `appcast.xml` → 打 tag → 创建 GitHub Release 并上传 DMG。另外每次推送都会跑一遍构建检查（`build.yml`）。
+
+### 一次性配置仓库 Secrets
+
+1. 在「钥匙串访问」里把 *Developer ID Application* 证书（连同私钥）导出成 `.p12`，设一个密码
+2. 准备好 App Store Connect API 密钥的 Issuer ID（App Store Connect →「用户和访问」→「集成」页面顶部），`.p8` 文件默认从 `~/.appstoreconnect/private_keys/` 读取
+3. 运行脚本，按提示操作，它会校验后用 `gh secret set` 写进仓库：
+
+   ```bash
+   ./scripts/setup-ci-secrets.sh
+   ```
+
+Sparkle 更新签名私钥存在本机登录钥匙串（账户 `keypop`），脚本会自动导出上传。**私钥务必另外备份**，丢了以后旧版本就再也收不到更新：
+
+```bash
+build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys --account keypop -x keypop-sparkle-private.key
+```
+
+### 发布新版本
+
+GitHub → Actions → Release → Run workflow，填版本号和更新说明（多条用分号分隔）。或者命令行：
+
+```bash
+gh workflow run release.yml -f version=1.1.0 -f notes="新增了 xxx；修复了 yyy"
+```
+
+本地也能用同一个脚本发布或试打包：`DRY_RUN=1 SKIP_NOTARIZE=1 ./scripts/release.sh 1.1.0`（只在 `build/release/` 里打包，不推送）。
+
 ## 素材
 
 Emoji 来自 [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji)，MIT 协议。
